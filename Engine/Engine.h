@@ -48,7 +48,6 @@ private:
 
 	struct Scan {
 		string Input; // Valor a buscar en memoria en la iteracion actual. 
-		string FirstValue; // Primer valor introducido.
 
 		DWORD ProcessID; // ID del proceso tratado en el escaner.
 		int DataSize; // Tamaño del dato a tratar en el escaner.

@@ -26,22 +26,7 @@ bool Engine::compareInt(char* data, char* previous)
 		{
 			int iInput;
 			iInput = stoi(this->Escaner.Input);
-			if (previous != NULL)
-			{
-				int anterior = *reinterpret_cast<int*>(previous);
-				int anteriorInput = stoi(this->Escaner.FirstValue);
-
-				/* Outputs de control para saber los valores tratados*/
-
-				cout << "El valor actual es:" << value << endl;
-				cout << "El valor anterior es:" << anterior << endl; 
-
-				if (anterior == anteriorInput && value == iInput)
-				{
-					return true;
-				}
-			}
-			else if (iInput == value) return true;
+			if (iInput == value) return true;
 
 		}
 		else
@@ -257,7 +242,12 @@ void Engine::compareEntireRegion(HANDLE hProcess, StoredRegion& actual, Regions&
 			}
 
 			int checkpoint = 512 * divisiones;
-			for (int i = checkpoint; i < regionSize; i += this->Escaner.DataSize)
+
+			unsigned int resto = regionSize - checkpoint;
+			unsigned int ajuste = resto % 4; 
+			unsigned int endRegion = regionSize - ajuste; 
+
+			for (int i = checkpoint; i < endRegion; i += this->Escaner.DataSize)
 			{
 				if (compareValue(newValues + i, actual.MemoryContent + i))
 				{
@@ -416,7 +406,6 @@ void Engine::insertKnownValue(bool conocido)
 void Engine::insertSearchValue(string value)
 {
 	this->Escaner.Input = value;
-	if (this->Escaner.First) this->Escaner.FirstValue = value;
 }
 void Engine::insertValueState(int state)
 {
@@ -498,11 +487,7 @@ void Engine::firstMemoryScan()
 				if (regionSize > maxRegionSize) regionSize = (unsigned int)maxRegionSize;
 			}
 
-			/* 
-			_tprintf(TEXT("Base address: %p\n"), base);
-			cout << "Espacio en la region: " << regionSize << endl;
-			*/
-
+	
 			if ((mbi.State & MEM_COMMIT)
 				&& (mbi.Protect & PAGE_READWRITE)
 				&& !(mbi.Protect & PAGE_GUARD)
@@ -571,7 +556,6 @@ void Engine::knownScanFirstStructures(StoredRegion& nueva)
 	Region nuevaRegion;
 	nuevaRegion.BaseAddress = nueva.BaseAddress;
 	int contador = this->TotalAddresses;
-	if (nueva.RegionSize % this->Escaner.DataSize) cout << "MEGAMIAU" << endl;
 	for (int i = 0; i < nueva.RegionSize; i += this->Escaner.DataSize)
 	{
 		if (compareValue(nueva.MemoryContent + i, NULL))
